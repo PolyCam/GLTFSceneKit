@@ -8,6 +8,11 @@
 
 import SceneKit
 
+enum GLTFSceneSourceError: Error {
+    case nilLoader
+}
+
+
 @objcMembers
 public class GLTFSceneSource : SCNSceneSource {
     private var loader: GLTFUnarchiver! = nil
@@ -55,6 +60,10 @@ public class GLTFSceneSource : SCNSceneSource {
     }
     
     public override func scene(options: [SCNSceneSource.LoadingOption : Any]? = nil) throws -> SCNScene {
+        guard let loader = self.loader else {
+            throw GLTFSceneSourceError.nilLoader
+        }
+
         let scene = try self.loader.loadScene()
         #if SEEMS_TO_HAVE_SKINNER_VECTOR_TYPE_BUG
             let sceneData = NSKeyedArchiver.archivedData(withRootObject: scene)
