@@ -38,7 +38,7 @@ public class GLTFUnarchiver {
     private var images: [Image?] = []
     private var maxAnimationDuration: CFTimeInterval = 0.0
 
-    private(set) loadAlbedoOnly = true
+    private(set) var loadAlbedoOnly = true
     
     #if !os(watchOS)
         private var workingAnimationGroup: CAAnimationGroup! = nil
