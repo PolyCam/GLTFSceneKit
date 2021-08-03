@@ -1012,18 +1012,21 @@ public class GLTFUnarchiver {
         }
         
         if let normalTexture = glMaterial.normalTexture {
-            print("Loading normal texture")
+            print("Skipping normal map")
+            /*
             try self.setTexture(index: normalTexture.index, to: material.normal)
             material.normal.mappingChannel = normalTexture.texCoord
-            
+            */
             // TODO: - use normalTexture.scale
         }
         
         if let occlusionTexture = glMaterial.occlusionTexture {
-            print("Loading occlusion texture")
+            print("Skipping AO map")
+            /*
             try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
             material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
             material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
+            */
         }
         
         if let emissiveTexture = glMaterial.emissiveTexture {
