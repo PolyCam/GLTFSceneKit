@@ -17,7 +17,13 @@ let package = Package(
             name: "GLTFSceneKit",
             path: "Sources",
             resources: [
-                .copy("Resources"),
+                .copy("Resources/GLTFShaderModifierFragment_alphaCutoff.shader"),
+                .copy("Resources/GLTFShaderModifierSurface_alphaModeBlend.shader"),
+                .copy("Resources/GLTFShaderModifierSurface_doubleSidedWorkaround.shader"),
+                .copy("Resources/GLTFShaderModifierSurface_pbrSpecularGlossiness_doubleSidedWorkaround.shader"),
+                .copy("Resources/GLTFShaderModifierSurface_pbrSpecularGlossiness_texture_doubleSidedWorkaround.shader"),
+                .copy("Resources/GLTFShaderModifierSurface_pbrSpecularGlossiness.shader"),
+                .copy("Resources/GLTFShaderModifierSurface.shader"),
             ])
     ]
 )
