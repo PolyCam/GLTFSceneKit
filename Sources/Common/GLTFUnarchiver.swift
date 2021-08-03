@@ -968,9 +968,7 @@ public class GLTFUnarchiver {
         material.setValue(glMaterial.emissiveFactor[2], forKey: "emissiveFactorB")
         material.setValue(glMaterial.alphaCutoff, forKey: "alphaCutoff")
 
-        if loadAlbedoOnly {
-            print("Load albedo only flag set to true! Skipping auxiliary materials")
-        } else {
+
         
         if let pbr = glMaterial.pbrMetallicRoughness {
             material.lightingModel = .physicallyBased
@@ -1018,23 +1016,28 @@ public class GLTFUnarchiver {
             
         }
         
-        if let normalTexture = glMaterial.normalTexture {
-            print("Skipping normal map")
-            /*
-            try self.setTexture(index: normalTexture.index, to: material.normal)
-            material.normal.mappingChannel = normalTexture.texCoord
-            */
-            // TODO: - use normalTexture.scale
-        }
-        
-        if let occlusionTexture = glMaterial.occlusionTexture {
-            print("Skipping AO map")
-            /*
-            try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
-            material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
-            material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
-            */
-        }
+
+        if loadAlbedoOnly {
+            print("Load albedo only flag set to true! Skipping auxiliary materials")
+        } else {
+            if let normalTexture = glMaterial.normalTexture {
+                print("Skipping normal map")
+                
+                try self.setTexture(index: normalTexture.index, to: material.normal)
+                material.normal.mappingChannel = normalTexture.texCoord
+                
+                // TODO: - use normalTexture.scale
+            }
+            
+            if let occlusionTexture = glMaterial.occlusionTexture {
+                print("Skipping AO map")
+                
+                try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
+                material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
+                material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
+                
+            }
+         }
         
         if let emissiveTexture = glMaterial.emissiveTexture {
             if material.lightingModel == .physicallyBased {
@@ -1044,7 +1047,7 @@ public class GLTFUnarchiver {
             material.emission.mappingChannel = emissiveTexture.texCoord
         }
 
-        }
+       
         
         material.isDoubleSided = glMaterial.doubleSided
         
