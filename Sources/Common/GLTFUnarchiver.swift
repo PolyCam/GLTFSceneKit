@@ -37,6 +37,8 @@ public class GLTFUnarchiver {
     private var textures: [SCNMaterialProperty?] = []
     private var images: [Image?] = []
     private var maxAnimationDuration: CFTimeInterval = 0.0
+
+    private(set) loadAlbedoOnly = true
     
     #if !os(watchOS)
         private var workingAnimationGroup: CAAnimationGroup! = nil
@@ -953,6 +955,7 @@ public class GLTFUnarchiver {
         let glMaterial = materials[index]
         let material = SCNMaterial()
         self.materials[index] = material
+
         
         material.setValue(Float(1.0), forKey: "baseColorFactorR")
         material.setValue(Float(1.0), forKey: "baseColorFactorG")
@@ -964,6 +967,10 @@ public class GLTFUnarchiver {
         material.setValue(glMaterial.emissiveFactor[1], forKey: "emissiveFactorG")
         material.setValue(glMaterial.emissiveFactor[2], forKey: "emissiveFactorB")
         material.setValue(glMaterial.alphaCutoff, forKey: "alphaCutoff")
+
+        if loadAlbedoOnly {
+            print("Load albedo only flag set to true! Skipping auxiliary materials")
+        } else {
         
         if let pbr = glMaterial.pbrMetallicRoughness {
             material.lightingModel = .physicallyBased
@@ -1035,6 +1042,8 @@ public class GLTFUnarchiver {
             }
             try self.setTexture(index: emissiveTexture.index, to: material.emission)
             material.emission.mappingChannel = emissiveTexture.texCoord
+        }
+
         }
         
         material.isDoubleSided = glMaterial.doubleSided
