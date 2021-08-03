@@ -1012,6 +1012,7 @@ public class GLTFUnarchiver {
         }
         
         if let normalTexture = glMaterial.normalTexture {
+            print("Loading normal texture")
             try self.setTexture(index: normalTexture.index, to: material.normal)
             material.normal.mappingChannel = normalTexture.texCoord
             
@@ -1019,6 +1020,7 @@ public class GLTFUnarchiver {
         }
         
         if let occlusionTexture = glMaterial.occlusionTexture {
+            print("Loading occlusion texture")
             try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
             material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
             material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
