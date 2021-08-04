@@ -28,11 +28,11 @@ public class GLTFSceneSource : SCNSceneSource {
         self.loader = loader
     }
     
-    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]? = nil, gltfOptions: [GLTFLoadOption] = []) {
+    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]? = nil, gltfOptions: GLTFLoadOptions = .init()) {
         self.init(url: url, options: options, extensions: nil, gltfOptions: gltfOptions)
     }
     
-    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?, gltfOptions: [GLTFLoadOption]) {
+    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?, gltfOptions: GLTFLoadOptions = .init()) {
         self.init()
         
         do {
