@@ -28,15 +28,15 @@ public class GLTFSceneSource : SCNSceneSource {
         self.loader = loader
     }
     
-    public override convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]? = nil) {
-        self.init(url: url, options: options, extensions: nil)
+    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]? = nil, gltfOptions: [GLTFLoadOption] = []) {
+        self.init(url: url, options: options, extensions: nil, gltfOptions: gltfOptions)
     }
     
-    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?) {
+    public convenience init(url: URL, options: [SCNSceneSource.LoadingOption : Any]?, extensions: [String:Codable.Type]?, gltfOptions: [GLTFLoadOption]) {
         self.init()
         
         do {
-            self.loader = try GLTFUnarchiver(url: url, extensions: extensions)
+            self.loader = try GLTFUnarchiver(url: url, extensions: extensions, options: gltfOptions)
         } catch {
             print("\(error.localizedDescription)")
         }
@@ -64,7 +64,7 @@ public class GLTFSceneSource : SCNSceneSource {
             throw GLTFSceneSourceError.nilLoader
         }
 
-        let scene = try self.loader.loadScene()
+        let scene = try loader.loadScene()
         #if SEEMS_TO_HAVE_SKINNER_VECTOR_TYPE_BUG
             let sceneData = NSKeyedArchiver.archivedData(withRootObject: scene)
             let source = SCNSceneSource(data: sceneData, options: nil)!

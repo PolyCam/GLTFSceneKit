@@ -15,6 +15,13 @@ let glbMagic = 0x46546C67 // "glTF"
 let chunkTypeJSON = 0x4E4F534A // "JSON"
 let chunkTypeBIN = 0x004E4942 // "BIN"
 
+
+public enum GLTFLoadOption {
+    case skipNormalMap // whether to skip loading normal map (to save memory)
+    case skipAOMap // whether to skip loading AO map (to save memory)
+    case maxTextureSize4k // will resize any texture/material map larger than 4k to 4k
+}
+
 public class GLTFUnarchiver {
     private var directoryPath: URL? = nil
     private var json: GLTFGlTF! = nil
@@ -37,14 +44,14 @@ public class GLTFUnarchiver {
     private var textures: [SCNMaterialProperty?] = []
     private var images: [Image?] = []
     private var maxAnimationDuration: CFTimeInterval = 0.0
+    private(set) var options: [GLTFLoadOption] = []
 
-    private(set) var loadAlbedoOnly = true
     
     #if !os(watchOS)
         private var workingAnimationGroup: CAAnimationGroup! = nil
     #endif
     
-    convenience public init(path: String, extensions: [String:Codable.Type]? = nil) throws {
+    convenience public init(path: String, extensions: [String:Codable.Type]? = nil, options: [GLTFLoadOption] = []) throws {
         var url: URL?
         if let mainPath = Bundle.main.path(forResource: path, ofType: "") {
             url = URL(fileURLWithPath: mainPath)
@@ -54,13 +61,14 @@ public class GLTFUnarchiver {
         guard let _url = url else {
             throw URLError(.fileDoesNotExist)
         }
-        try self.init(url: _url, extensions: extensions)
+        try self.init(url: _url, extensions: extensions, options: options)
     }
     
-    convenience public init(url: URL, extensions: [String:Codable.Type]? = nil) throws {
+    convenience public init(url: URL, extensions: [String:Codable.Type]? = nil, options: [GLTFLoadOption] = []) throws {
         let data = try Data(contentsOf: url)
         try self.init(data: data, extensions: extensions)
         self.directoryPath = url.deletingLastPathComponent()
+        self.options = options
     }
     
     public init(data: Data, extensions: [String:Codable.Type]? = nil) throws {
@@ -1017,27 +1025,19 @@ public class GLTFUnarchiver {
         }
         
 
-        if loadAlbedoOnly {
-            print("Load albedo only flag set to true! Skipping auxiliary materials")
-        } else {
-            if let normalTexture = glMaterial.normalTexture {
-                print("Skipping normal map")
-                
+
+        if let normalTexture = glMaterial.normalTexture, !options.contains(.skipNormalMap) {
                 try self.setTexture(index: normalTexture.index, to: material.normal)
                 material.normal.mappingChannel = normalTexture.texCoord
-                
                 // TODO: - use normalTexture.scale
             }
             
-            if let occlusionTexture = glMaterial.occlusionTexture {
-                print("Skipping AO map")
-                
+        if let occlusionTexture = glMaterial.occlusionTexture, !options.contains(.skipAOMap) {
                 try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
                 material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
                 material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
-                
             }
-         }
+         
         
         if let emissiveTexture = glMaterial.emissiveTexture {
             if material.lightingModel == .physicallyBased {
