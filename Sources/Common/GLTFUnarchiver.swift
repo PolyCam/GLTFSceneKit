@@ -817,7 +817,8 @@ public class GLTFUnarchiver {
         
         #if canImport(UIKit)
         if self.options.contains(.maxTextureSize4k) {
-            _image = _image.setMaxSize(maxSize: CGSize(width: 4096, height: 4096))
+           // _image = _image.setMaxSize(maxSize: CGSize(width: 4096, height: 4096))
+            UIImage.setMaxSize(image: &_image, maxSize: CGSize(width: 4096, height: 4096))
         }
         #endif
         
