@@ -18,6 +18,9 @@ extension UIImage {
      */
     static func setMaxSize(image: inout UIImage, maxSize: CGSize) {
         let size = image.size
+        if size.width == 0 || size.height == 0 {
+            return
+        }
         let widthRatio = maxSize.width / size.width
         let heightRatio = maxSize.height / size.height
         if widthRatio >= 1.0, heightRatio >= 1.0 {
