@@ -811,9 +811,15 @@ public class GLTFUnarchiver {
             image = try loadImageData(from: bufferView)
         }
         
-        guard let _image = image else {
+        guard var _image = image else {
             throw GLTFUnarchiveError.Unknown("loadImage: image \(index) is not loaded")
         }
+        
+        #if canImport(UIKit)
+        if self.options.contains(.maxTextureSize4k) {
+            _image = _image.setMaxSize(maxSize: CGSize(width: 4096, height: 4096))
+        }
+        #endif
         
         self.images[index] = _image
         
