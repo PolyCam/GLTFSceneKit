@@ -12,10 +12,12 @@ import UIKit
 
 extension UIImage {
     
+    /**
+     Resizes image in-place if image size exceeds maxSize
+     Otherwise does nothing
+     */
     static func setMaxSize(image: inout UIImage, maxSize: CGSize) {
         let size = image.size
-        print("Original image size= \(size)")
-        print("Maximum image size= \(maxSize)")
         let widthRatio = maxSize.width / size.width
         let heightRatio = maxSize.height / size.height
         if widthRatio >= 1.0, heightRatio >= 1.0 {
@@ -30,38 +32,7 @@ extension UIImage {
         image.draw(in: rect)
         image = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
-        print("Resized image size= \(image.size)")
-    }
-    
-    
-    func setMaxSize(maxSize: CGSize) -> UIImage {
-        let size = self.size
-        print("Original image size= \(size)")
-        print("Maximum image size= \(maxSize)")
-        let widthRatio = maxSize.width / size.width
-        let heightRatio = maxSize.height / size.height
-        if widthRatio >= 1.0, heightRatio >= 1.0 {
-            return self
-        }
-        
-        let resizeRatio = min(widthRatio, heightRatio)
-
-        let newSize = CGSize(width: size.width * resizeRatio, height: size.height * resizeRatio)
-        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-        draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        print("Resized image size= \(newImage.size)")
-        
-        return newImage
     }
 }
-
-
-
-
-
-
 
 #endif
