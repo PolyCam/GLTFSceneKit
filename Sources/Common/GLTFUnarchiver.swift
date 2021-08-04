@@ -15,6 +15,8 @@ let glbMagic = 0x46546C67 // "glTF"
 let chunkTypeJSON = 0x4E4F534A // "JSON"
 let chunkTypeBIN = 0x004E4942 // "BIN"
 
+
+
 public class GLTFUnarchiver {
     private var directoryPath: URL? = nil
     private var json: GLTFGlTF! = nil
@@ -37,12 +39,14 @@ public class GLTFUnarchiver {
     private var textures: [SCNMaterialProperty?] = []
     private var images: [Image?] = []
     private var maxAnimationDuration: CFTimeInterval = 0.0
+    private(set) var options = GLTFLoadOptions()
+
     
     #if !os(watchOS)
         private var workingAnimationGroup: CAAnimationGroup! = nil
     #endif
     
-    convenience public init(path: String, extensions: [String:Codable.Type]? = nil) throws {
+    convenience public init(path: String, extensions: [String:Codable.Type]? = nil, options: GLTFLoadOptions = .init() ) throws {
         var url: URL?
         if let mainPath = Bundle.main.path(forResource: path, ofType: "") {
             url = URL(fileURLWithPath: mainPath)
@@ -52,13 +56,15 @@ public class GLTFUnarchiver {
         guard let _url = url else {
             throw URLError(.fileDoesNotExist)
         }
-        try self.init(url: _url, extensions: extensions)
+        try self.init(url: _url, extensions: extensions, options: options)
     }
     
-    convenience public init(url: URL, extensions: [String:Codable.Type]? = nil) throws {
+    convenience public init(url: URL, extensions: [String:Codable.Type]? = nil, options: GLTFLoadOptions = .init()) throws {
         let data = try Data(contentsOf: url)
         try self.init(data: data, extensions: extensions)
         self.directoryPath = url.deletingLastPathComponent()
+        self.options = options
+        
     }
     
     public init(data: Data, extensions: [String:Codable.Type]? = nil) throws {
@@ -801,9 +807,15 @@ public class GLTFUnarchiver {
             image = try loadImageData(from: bufferView)
         }
         
-        guard let _image = image else {
+        guard var _image = image else {
             throw GLTFUnarchiveError.Unknown("loadImage: image \(index) is not loaded")
         }
+        
+        #if canImport(UIKit)
+        if let maxSize = self.options.maxTextureSize {
+            UIImage.setMaxSize(image: &_image, maxSize: CGSize(width: maxSize, height: maxSize))
+        }
+        #endif
         
         self.images[index] = _image
         
@@ -953,6 +965,7 @@ public class GLTFUnarchiver {
         let glMaterial = materials[index]
         let material = SCNMaterial()
         self.materials[index] = material
+
         
         material.setValue(Float(1.0), forKey: "baseColorFactorR")
         material.setValue(Float(1.0), forKey: "baseColorFactorG")
@@ -964,6 +977,8 @@ public class GLTFUnarchiver {
         material.setValue(glMaterial.emissiveFactor[1], forKey: "emissiveFactorG")
         material.setValue(glMaterial.emissiveFactor[2], forKey: "emissiveFactorB")
         material.setValue(glMaterial.alphaCutoff, forKey: "alphaCutoff")
+
+
         
         if let pbr = glMaterial.pbrMetallicRoughness {
             material.lightingModel = .physicallyBased
@@ -1011,18 +1026,20 @@ public class GLTFUnarchiver {
             
         }
         
-        if let normalTexture = glMaterial.normalTexture {
-            try self.setTexture(index: normalTexture.index, to: material.normal)
-            material.normal.mappingChannel = normalTexture.texCoord
+
+
+        if let normalTexture = glMaterial.normalTexture, !options.skipNormalMap {
+                try self.setTexture(index: normalTexture.index, to: material.normal)
+                material.normal.mappingChannel = normalTexture.texCoord
+                // TODO: - use normalTexture.scale
+            }
             
-            // TODO: - use normalTexture.scale
-        }
-        
-        if let occlusionTexture = glMaterial.occlusionTexture {
-            try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
-            material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
-            material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
-        }
+        if let occlusionTexture = glMaterial.occlusionTexture, !options.skipAOMap {
+                try self.setTexture(index: occlusionTexture.index, to: material.ambientOcclusion)
+                material.ambientOcclusion.mappingChannel = occlusionTexture.texCoord
+                material.ambientOcclusion.intensity = CGFloat(occlusionTexture.strength)
+            }
+         
         
         if let emissiveTexture = glMaterial.emissiveTexture {
             if material.lightingModel == .physicallyBased {
@@ -1031,6 +1048,8 @@ public class GLTFUnarchiver {
             try self.setTexture(index: emissiveTexture.index, to: material.emission)
             material.emission.mappingChannel = emissiveTexture.texCoord
         }
+
+       
         
         material.isDoubleSided = glMaterial.doubleSided
         
