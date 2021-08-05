@@ -15,7 +15,7 @@ let package = Package(
     targets: [
         .target(
             name: "GLTFSceneKit",
-            path: "Sources",
+            //path: "Sources",
             resources: [
                 .copy("Resources/GLTFShaderModifierFragment_alphaCutoff.shader"),
                 .copy("Resources/GLTFShaderModifierSurface_alphaModeBlend.shader"),
